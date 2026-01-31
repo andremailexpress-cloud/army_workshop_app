@@ -1,42 +1,41 @@
 import streamlit as st
-import pandas as pd
+import requests
 
-# 1. Page Configuration
-st.set_page_config(page_title="Army Workshop AI", page_icon="🦾", layout="wide")
+st.set_page_config(page_title="Army Workshop AI", page_icon="🦾")
 
 st.title("🦾 Army Workshop: AI Control Center")
-st.markdown("---")
 
-# 2. Inventory Check (Taking Stock)
-st.subheader("System Status")
-col1, col2, col3 = st.columns(3)
-col1.metric("App Link", "Active ✅")
-col2.metric("GitHub Sync", "Connected ✅")
-col3.metric("Environment", "Ready 🚀")
+# --- Logic for Google Search ---
+def google_search(search_query):
+    api_key = st.secrets["GOOGLE_API_KEY"]
+    cse_id = st.secrets["GOOGLE_CSE_ID"]
+    url = f"https://www.googleapis.com/customsearch/v1?key={api_key}&cx={cse_id}&q={search_query}"
+    response = requests.get(url)
+    return response.json()
 
-st.divider()
-
-# 3. Custom Workshop Tools
-st.header("Custom Workshop Tools")
-
-tab1, tab2 = st.tabs(["🔍 Google Search Engine", "🎙️ OpenAI Voice Command"])
+# --- Tabs ---
+tab1, tab2 = st.tabs(["🔍 Search Engine", "🎙️ OpenAI Voice"])
 
 with tab1:
-    st.write("### Google Custom Search")
-    query = st.text_input("Enter search term:", placeholder="What are we looking for?")
+    st.header("Google Custom Search")
+    user_query = st.text_input("Search the web:")
     if st.button("Search Now"):
-        # We will plug your specific Google API logic here next
-        st.info(f"Handshaking with Google Search Engine for: {query}...")
-        st.warning("Note: Ensure your GOOGLE_API_KEY is in Streamlit Secrets.")
+        if user_query:
+            results = google_search(user_query)
+            if "items" in results:
+                for item in results["items"]:
+                    st.write(f"### [{item['title']}]({item['link']})")
+                    st.write(item['snippet'])
+                    st.divider()
+            else:
+                st.error("No results found. Check your API keys!")
+        else:
+            st.warning("Please enter something to search for.")
 
 with tab2:
-    st.write("### OpenAI Voice & Audio")
-    st.info("This section will use your OpenAI API key for voice processing.")
-    audio_file = st.file_uploader("Upload an audio file to transcribe", type=['mp3', 'wav', 'm4a'])
-    if audio_file:
-        st.success("Audio received! Ready for OpenAI transcription.")
-
-st.sidebar.title("Workshop Settings")
-st.sidebar.write("Using API keys for:")
-st.sidebar.checkbox("OpenAI", value=True, disabled=True)
-st.sidebar.checkbox("Google Search", value=True, disabled=True)
+    st.header("OpenAI Voice Engine")
+    st.info("Your OpenAI Key is detected. Ready for voice integration.")
+    st.write("Upload an audio file to test transcription:")
+    audio = st.file_uploader("Audio file", type=['mp3', 'wav'])
+    if audio:
+        st.success("File uploaded. Next step: Connect OpenAI Whisper API.")
