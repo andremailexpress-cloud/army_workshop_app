@@ -6,14 +6,9 @@ st.set_page_config(page_title='GDP Dashboard', page_icon=':earth_americas:')
 
 @st.cache_data
 def get_gdp_data():
-    # Using the most reliable raw link available
+    # This is the official, guaranteed RAW link for the data
     URL = "https://raw.githubusercontent.com/streamlit/gdp-dashboard-template/master/data/gdp_data.csv"
-    try:
-        raw_gdp_df = pd.read_csv(URL)
-    except:
-        # Emergency backup link
-        raw_gdp_df = pd.read_csv("https://raw.githubusercontent.com/dataprotocols/datasets/master/data/gdp.csv")
-    
+    raw_gdp_df = pd.read_csv(URL)
     gdp_df = raw_gdp_df.melt(['Country Code'], [str(x) for x in range(1960, 2023)], 'Year', 'GDP')
     gdp_df['Year'] = pd.to_numeric(gdp_df['Year'])
     return gdp_df
@@ -44,4 +39,4 @@ for i, country in enumerate(selected):
             val_last = last_year[last_year['Country Code'] == country]['GDP'].iat[0] / 1e9
             st.metric(label=f'{country} GDP', value=f'${val_last:,.0f}B')
         except:
-            pass
+            st.write(f"No data for {country}")
