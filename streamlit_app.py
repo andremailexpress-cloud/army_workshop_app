@@ -1,41 +1,26 @@
 import streamlit as st
-import requests
 
-st.set_page_config(page_title="Army Workshop AI", page_icon="🦾")
+st.title("🔧 System Diagnostics")
 
-st.title("🦾 Army Workshop: AI Control Center")
+# This checks if the "Keys" exist in your Secrets vault
+st.subheader("Secrets Check")
 
-# --- Logic for Google Search ---
-def google_search(search_query):
-    api_key = st.secrets["GOOGLE_API_KEY"]
-    cse_id = st.secrets["GOOGLE_CSE_ID"]
-    url = f"https://www.googleapis.com/customsearch/v1?key={api_key}&cx={cse_id}&q={search_query}"
-    response = requests.get(url)
-    return response.json()
+keys_to_check = ["GOOGLE_API_KEY", "GOOGLE_CSE_ID", "OPENAI_API_KEY"]
 
-# --- Tabs ---
-tab1, tab2 = st.tabs(["🔍 Search Engine", "🎙️ OpenAI Voice"])
+for key in keys_to_check:
+    if key in st.secrets:
+        st.success(f"✅ {key} is found in Secrets.")
+    else:
+        st.error(f"❌ {key} is MISSING from Secrets.")
 
-with tab1:
-    st.header("Google Custom Search")
-    user_query = st.text_input("Search the web:")
-    if st.button("Search Now"):
-        if user_query:
-            results = google_search(user_query)
-            if "items" in results:
-                for item in results["items"]:
-                    st.write(f"### [{item['title']}]({item['link']})")
-                    st.write(item['snippet'])
-                    st.divider()
-            else:
-                st.error("No results found. Check your API keys!")
-        else:
-            st.warning("Please enter something to search for.")
+st.divider()
 
-with tab2:
-    st.header("OpenAI Voice Engine")
-    st.info("Your OpenAI Key is detected. Ready for voice integration.")
-    st.write("Upload an audio file to test transcription:")
-    audio = st.file_uploader("Audio file", type=['mp3', 'wav'])
-    if audio:
-        st.success("File uploaded. Next step: Connect OpenAI Whisper API.")
+# This checks if the necessary libraries are installed
+st.subheader("Library Check")
+try:
+    import requests
+    st.success("✅ 'requests' library is ready.")
+except:
+    st.error("❌ 'requests' library is missing from requirements.txt")
+
+st.info("Once all three keys show a green checkmark above, your search engine will work.")
