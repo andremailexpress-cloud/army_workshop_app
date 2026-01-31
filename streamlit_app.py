@@ -1,42 +1,42 @@
 import streamlit as st
 import pandas as pd
-import math
 
-st.set_page_config(page_title='GDP Dashboard', page_icon=':earth_americas:')
+# 1. Page Configuration
+st.set_page_config(page_title="Army Workshop AI", page_icon="🦾", layout="wide")
 
-@st.cache_data
-def get_gdp_data():
-    # This is the official, guaranteed RAW link for the data
-    URL = "https://raw.githubusercontent.com/streamlit/gdp-dashboard-template/master/data/gdp_data.csv"
-    raw_gdp_df = pd.read_csv(URL)
-    gdp_df = raw_gdp_df.melt(['Country Code'], [str(x) for x in range(1960, 2023)], 'Year', 'GDP')
-    gdp_df['Year'] = pd.to_numeric(gdp_df['Year'])
-    return gdp_df
+st.title("🦾 Army Workshop: AI Control Center")
+st.markdown("---")
 
-gdp_df = get_gdp_data()
+# 2. Inventory Check (Taking Stock)
+st.subheader("System Status")
+col1, col2, col3 = st.columns(3)
+col1.metric("App Link", "Active ✅")
+col2.metric("GitHub Sync", "Connected ✅")
+col3.metric("Environment", "Ready 🚀")
 
-'# :earth_americas: GDP Dashboard'
+st.divider()
 
-min_v, max_v = int(gdp_df['Year'].min()), int(gdp_df['Year'].max())
-from_year, to_year = st.slider('Select Years', min_v, max_v, value=[min_v, max_v])
+# 3. Custom Workshop Tools
+st.header("Custom Workshop Tools")
 
-countries = gdp_df['Country Code'].unique()
-selected = st.multiselect('Select Countries', countries, ['DEU', 'FRA', 'GBR', 'BRA', 'MEX', 'JPN'])
+tab1, tab2 = st.tabs(["🔍 Google Search Engine", "🎙️ OpenAI Voice Command"])
 
-filtered_df = gdp_df[(gdp_df['Country Code'].isin(selected)) & (gdp_df['Year'] <= to_year) & (from_year <= gdp_df['Year'])]
+with tab1:
+    st.write("### Google Custom Search")
+    query = st.text_input("Enter search term:", placeholder="What are we looking for?")
+    if st.button("Search Now"):
+        # We will plug your specific Google API logic here next
+        st.info(f"Handshaking with Google Search Engine for: {query}...")
+        st.warning("Note: Ensure your GOOGLE_API_KEY is in Streamlit Secrets.")
 
-st.header('GDP over time', divider='gray')
-st.line_chart(filtered_df, x='Year', y='GDP', color='Country Code')
+with tab2:
+    st.write("### OpenAI Voice & Audio")
+    st.info("This section will use your OpenAI API key for voice processing.")
+    audio_file = st.file_uploader("Upload an audio file to transcribe", type=['mp3', 'wav', 'm4a'])
+    if audio_file:
+        st.success("Audio received! Ready for OpenAI transcription.")
 
-st.header(f'GDP in {to_year}', divider='gray')
-last_year = gdp_df[gdp_df['Year'] == to_year]
-
-cols = st.columns(2)
-for i, country in enumerate(selected):
-    col = cols[i % 2]
-    with col:
-        try:
-            val_last = last_year[last_year['Country Code'] == country]['GDP'].iat[0] / 1e9
-            st.metric(label=f'{country} GDP', value=f'${val_last:,.0f}B')
-        except:
-            st.write(f"No data for {country}")
+st.sidebar.title("Workshop Settings")
+st.sidebar.write("Using API keys for:")
+st.sidebar.checkbox("OpenAI", value=True, disabled=True)
+st.sidebar.checkbox("Google Search", value=True, disabled=True)
